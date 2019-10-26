@@ -6,6 +6,7 @@ import java.util.List;
 import javax.persistence.CollectionTable;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Table;
 
 @Entity
@@ -16,7 +17,7 @@ public class Regiao extends Entidade{
 
 	private String descricao;
 
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name = "cotacao_Regiao_Municipio")
 	private List<Municipio> municipioRegiaoList;
 

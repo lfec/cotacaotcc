@@ -6,6 +6,7 @@ import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -15,7 +16,7 @@ import javax.persistence.Table;
 @Table(name = "cotacao_Praca", indexes = {@Index(columnList = "order_index", name = "orderIndex"),@Index(columnList = "negociacao_id, order_index", name = "negociacaoOrderIndex")})
 public class Praca extends Entidade {
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.EAGER)
 	private Negociacao negociacao;
 
 	@AttributeOverrides({

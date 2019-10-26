@@ -1,10 +1,13 @@
 package com.lfec.domain;
 
+import java.util.List;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 
 @Embeddable
@@ -23,7 +26,7 @@ public class AreaGeografica {
 	@Column(length = 60)
 	private String nomeMun;
 
-	@ManyToOne(cascade = {CascadeType.MERGE})
+	@ManyToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.EAGER)
 	private Regiao regiao;
 
 	@Column(length = 2)
@@ -45,6 +48,42 @@ public class AreaGeografica {
 	private Integer cepTermino;
 	
 
+	public boolean atende(End endereco) {
+		boolean ret = false;
+		
+		switch (tipoAreaGeografica) {
+		case CEP:
+			ret = cepInicio<=endereco.getCep() && cepTermino>=endereco.getCep();
+			break;
+		case MUNICIPIO:
+			ret = codigoMun.equals(endereco.getCodigoMun());
+			break;
+		case UF:
+			ret = codigoUf.equals(endereco.getCodigoUf());
+			break;
+		case REGIAO:
+			
+			List<Municipio> list = regiao.getMunicipioRegiaoList();
+			for (Municipio municipio : list) {
+				if (municipio.getCodigo().equals(endereco.getCodigoMun())) {
+					ret = true;
+					break;
+				}
+			}
+			
+			
+			break;
+		case PAIS:
+			ret = codigoPais.equals(endereco.getCodigoPais());
+			break;
+
+		default:
+			break;
+		}
+		
+		return ret;
+	}
+	
 	public AreaGeografica() {
 		tipoAreaGeografica = TipoAreaGeografica.PAIS;
 	}

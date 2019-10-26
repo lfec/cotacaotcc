@@ -1,8 +1,11 @@
 package com.lfec.test;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import org.junit.Test;
@@ -15,6 +18,8 @@ import com.lfec.domain.Negociacao;
 import com.lfec.domain.Praca;
 import com.lfec.domain.Regiao;
 import com.lfec.domain.AreaGeografica.TipoAreaGeografica;
+import com.lfec.domain.End;
+import com.lfec.query.AllPracaQuery;
 import com.lfec.query.PracaQuery;
 
 public class CotacaoTest {
@@ -120,12 +125,118 @@ public class CotacaoTest {
 		return end.getRegiao();
 
 	}
+	
+	@Test
+	public void testCotacaoMapa() {
+		
+		Date d1 = new Date();
+//		AllPracaQuery pq = new AllPracaQuery();
+//		QueryReturn<Praca> pqueryRet = dao.query(pq);
+		
+		List<Praca> retList = new ArrayList<Praca>();
+		
+		int emp = 1;
+		int pracaCount = 0;
+		int totalEmpresas = 50000;
+		int totalPracas = 50;
+
+		Random random = new Random(123l);
+
+		for (int i = 0; i < totalEmpresas; i++) {
+
+			Negociacao n = new Negociacao();
+			n.setEmpresaNome("Empresa " + emp);
+			n.setNome("negociacao " + emp);
+
+			List<Praca> pracaList = new ArrayList<Praca>();
+			n.setPracaList(pracaList);
+
+			for (int j = 0; j < totalPracas; j++) {
+
+				Endereco endOr = enderecos[random.nextInt(enderecos.length)];
+				Endereco endDest = enderecos[random.nextInt(enderecos.length)];
+				TipoAreaGeografica tipoOr = tipos[random.nextInt(tipos.length)];
+				TipoAreaGeografica tipoDest = tipos[random.nextInt(tipos.length)];
+
+				Praca p = createPraca(endOr, tipoOr, endDest, tipoDest);
+				p.setNegociacao(n);
+				pracaList.add(p);
+				retList.add(p);
+				pracaCount++;
+
+			}
+//			dao.persist(n);
+			emp++;
+
+		}
+		
+		List<Praca> pracaList = retList;
+		
+		Date d2 = new Date();
+		long time = d2.getTime() - d1.getTime();
+		System.out.println(time / 1000 + "segundos para retornar todos os dados do banco");
+		System.out.println(pracaList.size() + " registros no total");
+		
+		
+		
+		int loop = 10; 
+		
+		random = new Random(123l);
+		
+		
+		for (int i = 0; i <loop; i++) {
+			
+			Map<String, Praca> pracaMapa = new HashMap<String, Praca>();
+			
+			Endereco endOr = enderecos[random.nextInt(enderecos.length)];
+			Endereco endDest = enderecos[random.nextInt(enderecos.length)];
+			
+			
+			End endIni = new End(); 
+			endIni.setCep(endOr.getCep());
+			endIni.setCodigoMun(endOr.getCodigoMun());
+			endIni.setCodigoUf(endOr.getCodigoUf());
+			endIni.setCodigoPais(endOr.getCodigoPais());
+			
+			End endFim = new End();
+			endFim.setCep(endDest.getCep());
+			endFim.setCodigoMun(endDest.getCodigoMun());
+			endFim.setCodigoUf(endDest.getCodigoUf());
+			endFim.setCodigoPais(endDest.getCodigoPais());
+			
+			for (Praca praca : pracaList) {
+				if(praca.getAreaOrigem().atende(endIni) && praca.getAreaDestino().atende(endFim)) {
+					String idnego = praca.getNegociacao().getId();
+					if (pracaMapa.containsKey(idnego)) {
+						if (pracaMapa.get(idnego).getOrder_index()>praca.getOrder_index()) {
+							pracaMapa.put(idnego, praca);
+						};
+					}else {
+						pracaMapa.put(idnego, praca);
+					}
+				}
+			}
+			
+			Collection<Praca> values = pracaMapa.values();
+//			System.out.println(values.size() + " registros encontrados");
+			
+//			for (Praca praca : values) {
+//				System.out.println(praca.getNegociacao().getId() + " - " + praca.getOrder_index());
+//			}
+
+		}
+
+		Date d3 = new Date();
+		long time2 = d3.getTime() - d2.getTime();
+		System.out.println(time2 / 1000 + "segundos para execução");
+		
+	}
 
 	@Test
 	public void testQuery() {
 		Date d1 = new Date();
 
-		int loop = 1; 
+		int loop = 10; 
 		PracaQuery pq = new PracaQuery();
 		
 		Random random = new Random(123l);
@@ -139,12 +250,19 @@ public class CotacaoTest {
 			pq.setCepIni(endOr.getCep());
 			pq.setCodMunicipioIni(endOr.getCodigoMun());
 			pq.setCodUfIni(endOr.getCodigoUf());
+			pq.setCofPaisIni(endOr.getCodigoPais());
 			
 			pq.setCepFim(endDest.getCep());
 			pq.setCodMunicipioFim(endDest.getCodigoMun());
 			pq.setCodUfFim(endDest.getCodigoUf());
+			pq.setCofPaisFim(endDest.getCodigoPais());
 
 			QueryReturn<Praca> pqueryRet = dao.query(pq);
+//			System.out.println(pqueryRet.getListaRetorno().size() + " registros encontrados");
+			
+//			for (Praca praca : pqueryRet.getListaRetorno()) {
+//				System.out.println(praca.getNegociacao().getId() + " - " + praca.getOrder_index());
+//			}
 		}
 
 		Date d2 = new Date();
@@ -161,7 +279,7 @@ public class CotacaoTest {
 
 		Date d1 = new Date();
 
-		int totalEmpresas = 5000;
+		int totalEmpresas = 50000;
 		int totalPracas = 50;
 
 		Random random = new Random(123l);
