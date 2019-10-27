@@ -1,4 +1,4 @@
-package com.lfec.domain;
+package com.lfec.sql.domain;
 
 import java.util.List;
 
@@ -9,6 +9,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
+
+import com.lfec.domain.Endereco;
 
 @Embeddable
 public class AreaGeografica {
@@ -48,7 +50,7 @@ public class AreaGeografica {
 	private Integer cepTermino;
 	
 
-	public boolean atende(End endereco) {
+	public boolean atende(Endereco endereco) {
 		boolean ret = false;
 		
 		switch (tipoAreaGeografica) {

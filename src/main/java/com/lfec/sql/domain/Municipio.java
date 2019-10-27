@@ -1,4 +1,4 @@
-package com.lfec.domain;
+package com.lfec.sql.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;

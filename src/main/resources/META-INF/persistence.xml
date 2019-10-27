@@ -6,10 +6,10 @@
 		transaction-type="RESOURCE_LOCAL">
 		<!-- -->
 		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-		<class>com.lfec.domain.AreaGeografica</class>
-		<class>com.lfec.domain.Negociacao</class>
-		<class>com.lfec.domain.Praca</class>
-		<class>com.lfec.domain.Regiao</class>
+		<class>com.lfec.sql.domain.AreaGeografica</class>
+		<class>com.lfec.sql.domain.Negociacao</class>
+		<class>com.lfec.sql.domain.Praca</class>
+		<class>com.lfec.sql.domain.Regiao</class>
 		<exclude-unlisted-classes />
 		<properties>
 			<property name="hibernate.dialect"

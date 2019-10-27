@@ -1,9 +1,9 @@
-package com.lfec.controller;
+package com.lfec.sql.controller;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import com.lfec.domain.Entidade;
+import com.lfec.sql.domain.Entidade;
 
 public abstract class Query <T extends Entidade> {
 	

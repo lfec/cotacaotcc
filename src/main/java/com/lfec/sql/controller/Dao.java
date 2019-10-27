@@ -1,5 +1,6 @@
-package com.lfec.controller;
+package com.lfec.sql.controller;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.EntityManager;
@@ -8,7 +9,8 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 
-import com.lfec.domain.Entidade;
+import com.lfec.sql.domain.Entidade;
+import com.lfec.sql.domain.Negociacao;
 
 public class Dao {
 
@@ -69,28 +71,24 @@ public class Dao {
 		return obj;
 	}
 
-	public <T extends Entidade> QueryReturn<T> query(Query<T> query){
-		QueryReturn<T> ret = query.getQueryReturn();
-		
+	public <T extends Entidade> List<Object[]> list(Query<T> query) {
+
 		EntityTransaction transaction = openTransaction();
 		EntityManager manager = getManager();
+		List<Object[]> ret = null;
 		try {
-
-
-			TypedQuery<T> typedQuery = manager.createQuery(query.getSelectQuery(), query.getEntidadeClass());
-			
+			javax.persistence.Query listQuery = manager.createQuery(query.getSelectQuery());
 			for (Map.Entry<String, Object> param : query.getParamMap().entrySet()) {
-				typedQuery.setParameter(param.getKey(), param.getValue());
+				listQuery.setParameter(param.getKey(), param.getValue());
 			}
 			if (query.getOffSet() != 0) {
-				typedQuery.setFirstResult(query.getOffSet());
+				listQuery.setFirstResult(query.getOffSet());
 			}
 			if (query.getLimit() != 0) {
-				typedQuery.setMaxResults(query.getLimit());
+				listQuery.setMaxResults(query.getLimit());
 			}
-			ret.setListaRetorno(typedQuery.getResultList());
-			
-			
+
+			ret = listQuery.getResultList();
 
 			manager.flush();
 			transaction.commit();
@@ -101,8 +99,69 @@ public class Dao {
 		} finally {
 			manager.close();
 		}
-		
-		
 		return ret;
 	}
+
+	public <T extends Entidade> QueryReturn<T> query(Query<T> query) {
+		QueryReturn<T> ret = query.getQueryReturn();
+
+		EntityTransaction transaction = openTransaction();
+		EntityManager manager = getManager();
+		try {
+
+			TypedQuery<T> typedQuery = manager.createQuery(query.getSelectQuery(), query.getEntidadeClass());
+
+			for (Map.Entry<String, Object> param : query.getParamMap().entrySet()) {
+				typedQuery.setParameter(param.getKey(), param.getValue());
+			}
+			if (query.getOffSet() != 0) {
+				typedQuery.setFirstResult(query.getOffSet());
+			}
+			if (query.getLimit() != 0) {
+				typedQuery.setMaxResults(query.getLimit());
+			}
+			ret.setListaRetorno(typedQuery.getResultList());
+
+			manager.flush();
+			transaction.commit();
+		} catch (Exception e) {
+			if (transaction != null) {
+				transaction.rollback();
+			}
+		} finally {
+			manager.close();
+		}
+
+		return ret;
+	}
+
+	public <T extends Entidade> List<T> persist(List<T> objList) {
+
+		EntityTransaction transaction = openTransaction();
+		EntityManager manager = getManager();
+		try {
+
+			for (T obj : objList) {
+
+				if (obj.isNew()) {
+					manager.persist(obj);
+
+				} else {
+					manager.merge(obj);
+				}
+
+			}
+
+			manager.flush();
+			transaction.commit();
+		} catch (Exception e) {
+			if (transaction != null) {
+				transaction.rollback();
+			}
+		} finally {
+			manager.close();
+		}
+		return objList;
+	}
+
 }

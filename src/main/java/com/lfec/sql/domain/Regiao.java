@@ -1,4 +1,4 @@
-package com.lfec.domain;
+package com.lfec.sql.domain;
 
 import java.util.ArrayList;
 import java.util.List;

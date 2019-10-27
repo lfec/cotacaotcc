@@ -1,7 +1,9 @@
-package com.lfec.domain;
+package com.lfec.test;
 
-public class End {
-	
+import com.lfec.sql.domain.Regiao;
+
+public class EnderecoTeste {
+
 	private Integer codigoMun;
 
 	private Integer codigoUf;
@@ -9,6 +11,15 @@ public class End {
 	private Integer codigoPais;
 
 	private Integer cep;
+
+	private Regiao regiao;
+
+	public EnderecoTeste(Integer cep, Integer codigoMun, Integer codigoUf, Integer codigoPais) {
+		this.cep = cep;
+		this.codigoMun = codigoMun;
+		this.codigoUf = codigoUf;
+		this.codigoPais = codigoPais;
+	}
 
 	public Integer getCodigoMun() {
 		return codigoMun;
@@ -41,7 +52,13 @@ public class End {
 	public void setCep(Integer cep) {
 		this.cep = cep;
 	}
-	
-	
+
+	public Regiao getRegiao() {
+		return regiao;
+	}
+
+	public void setRegiao(Regiao regiao) {
+		this.regiao = regiao;
+	}
 
 }

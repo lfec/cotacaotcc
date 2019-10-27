@@ -1,10 +1,10 @@
-package com.lfec.query;
+package com.lfec.sql.query;
 
 import java.util.Map;
 
-import com.lfec.controller.Query;
-import com.lfec.controller.QueryReturn;
-import com.lfec.domain.Praca;
+import com.lfec.sql.controller.Query;
+import com.lfec.sql.controller.QueryReturn;
+import com.lfec.sql.domain.Praca;
 
 public class PracaQuery extends Query<Praca> {
 	

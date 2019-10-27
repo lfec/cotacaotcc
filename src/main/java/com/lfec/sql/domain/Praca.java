@@ -1,4 +1,4 @@
-package com.lfec.domain;
+package com.lfec.sql.domain;
 
 import javax.persistence.AssociationOverride;
 import javax.persistence.AssociationOverrides;
@@ -11,6 +11,8 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import com.lfec.domain.Endereco;
 
 @Entity
 @Table(name = "cotacao_Praca", indexes = {@Index(columnList = "order_index", name = "orderIndex"),@Index(columnList = "negociacao_id, order_index", name = "negociacaoOrderIndex")})
@@ -79,6 +81,10 @@ public class Praca extends Entidade {
 
 	public void setOrder_index(int order_index) {
 		this.order_index = order_index;
+	}
+	
+	public boolean atende(Endereco origem, Endereco destino) {
+		return areaOrigem.atende(origem) && areaDestino.atende(destino);
 	}
 
 }

@@ -1,9 +1,7 @@
-package com.lfec.test;
-
-import com.lfec.domain.Regiao;
+package com.lfec.domain;
 
 public class Endereco {
-
+	
 	private Integer codigoMun;
 
 	private Integer codigoUf;
@@ -11,15 +9,6 @@ public class Endereco {
 	private Integer codigoPais;
 
 	private Integer cep;
-
-	private Regiao regiao;
-
-	public Endereco(Integer cep, Integer codigoMun, Integer codigoUf, Integer codigoPais) {
-		this.cep = cep;
-		this.codigoMun = codigoMun;
-		this.codigoUf = codigoUf;
-		this.codigoPais = codigoPais;
-	}
 
 	public Integer getCodigoMun() {
 		return codigoMun;
@@ -52,13 +41,7 @@ public class Endereco {
 	public void setCep(Integer cep) {
 		this.cep = cep;
 	}
-
-	public Regiao getRegiao() {
-		return regiao;
-	}
-
-	public void setRegiao(Regiao regiao) {
-		this.regiao = regiao;
-	}
+	
+	
 
 }

@@ -1,12 +1,13 @@
-package com.lfec.controller;
+package com.lfec.sql.controller;
 
 import java.util.List;
 
-import com.lfec.domain.Entidade;
+import com.lfec.sql.domain.Entidade;
 
 public class QueryReturn<T extends Entidade> {
 	
 	private List<T> listaRetorno;
+	private List<Object[]> objectList;
 	private int total;
 	public List<T> getListaRetorno() {
 		return listaRetorno;
@@ -19,6 +20,12 @@ public class QueryReturn<T extends Entidade> {
 	}
 	public void setTotal(int total) {
 		this.total = total;
+	}
+	public List<Object[]> getObjectList() {
+		return objectList;
+	}
+	public void setObjectList(List<Object[]> objectList) {
+		this.objectList = objectList;
 	}
 	
 	
