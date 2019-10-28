@@ -1,31 +1,29 @@
 package com.lfec.test;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
 import org.junit.Test;
 
-import com.lfec.compiler.EscreverClasse;
 import com.lfec.domain.Endereco;
-import com.lfec.domain.PracaWrapper;
 import com.lfec.dsl.DSLUtils;
 import com.lfec.dsl.domain.NegociacaoDSL;
 import com.lfec.dsl.domain.PracaDSL;
 import com.lfec.sql.controller.Dao;
-import com.lfec.sql.domain.AreaGeografica;
-import com.lfec.sql.domain.Municipio;
-import com.lfec.sql.domain.Negociacao;
-import com.lfec.sql.domain.Praca;
-import com.lfec.sql.domain.Regiao;
 import com.lfec.sql.domain.AreaGeografica.TipoAreaGeografica;
+import com.lfec.sql.domain.Negociacao;
 import com.lfec.sql.query.PracaListQuery;
+import com.lfec.sql.query.PracaListQueryNoSort;
 
 public class CotacaoTest {
 
 	static Dao dao = Dao.getInstance();
+	
+	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
 	static TipoAreaGeografica[] tipos = { TipoAreaGeografica.CEP, TipoAreaGeografica.MUNICIPIO, TipoAreaGeografica.UF,
 			TipoAreaGeografica.REGIAO };
@@ -58,66 +56,17 @@ public class CotacaoTest {
 	};
 
 	@Test
-	public void testCotacaoMapa() {
-
-		int totalNegociacoes = 1000;
-		int totalPracas = 15;
-
-		List<Negociacao> negociacaoList = TestUtils.createBase(totalNegociacoes, totalPracas,enderecos,tipos);
-
-		Random random = new Random(123l);
-
-		Date d2 = new Date();
-
-		int loop = 1;
-
-		for (int i = 0; i < loop; i++) {
-			List<PracaWrapper> pracaRet = new ArrayList<PracaWrapper>();
-
-			EnderecoTeste endOr = enderecos[random.nextInt(enderecos.length)];
-			EnderecoTeste endDest = enderecos[random.nextInt(enderecos.length)];
-
-			Endereco endIni = new Endereco();
-			TestUtils.toEndereco(endOr, endIni);
-
-			Endereco endFim = new Endereco();
-			TestUtils.toEndereco(endDest, endFim);
-
-			for (Negociacao negociacao : negociacaoList) {
-				List<Praca> pracaList = negociacao.getPracaList();
-
-				for (Praca praca : pracaList) {
-					if (praca.getAreaOrigem().atende(endIni) && praca.getAreaDestino().atende(endFim)) {
-
-						pracaRet.add(new PracaWrapper(negociacao.getId(), praca.getId(), praca.getOrder_index()));
-
-						break;
-					}
-				}
-
-			}
-			System.out.println(pracaRet.size() + " registros encontrados");
-
-			for (PracaWrapper praca : pracaRet) {
-				System.out.println(praca.getNegociacaoId() + " - "+praca.getPracaId() + " - " + praca.getOrderIndex());
-			}
-
-		}
-
-		Date d3 = new Date();
-		long time2 = d3.getTime() - d2.getTime();
-		System.out.println(time2 / 1000 + "segundos para execução");
-
-	}
-	
-	@Test
-	public void testQuery() {
+	public void testQuery() throws IOException {
 		Date d1 = new Date();
 
-		int loop = 10;
+		int loop = 100;
 		PracaListQuery pq = new PracaListQuery();
 
 		Random random = new Random(123l);
+		
+		String nomeArquivo="SQL-"+18750;
+		
+		FileWriter fw = new FileWriter(new File("src\\main\\resources\\" + nomeArquivo+"-log.txt"));
 
 		for (int i = 0; i < loop; i++) {
 
@@ -137,6 +86,8 @@ public class CotacaoTest {
 			List<Object[]> pqueryRet = dao.list(pq);
 
 			System.out.println(pqueryRet.size() + " registros encontrados");
+			fw.write(pqueryRet.size() + " registros encontrados");
+			fw.write(LINE_SEPARATOR);
 //			for (Object[] praca : pqueryRet) {
 //				System.out.println(praca[0] + " - " +praca[1]+" - "+ praca[2]);
 //			}
@@ -144,14 +95,85 @@ public class CotacaoTest {
 
 		Date d2 = new Date();
 		long time = d2.getTime() - d1.getTime();
-		System.out.println(time / 1000 + "segundos para execução");
+		System.out.println(time + "milisegundos para execução");
+		
+		fw.write(time  + "milisegundos para execução");
+		
+		fw.flush();
+		fw.close();
 
 	}
 
 	@Test
+	public void testQueryCreateBase() throws IOException, InterruptedException{
+		
+		int totalNegociacoes = 75000;
+		int totalPracas = 25;
+
+		Date d1 = new Date();
+
+		List<Negociacao> negociacaoList = TestUtils.createBase(totalNegociacoes, totalPracas,enderecos,tipos);
+		
+		dao.persist(negociacaoList);
+		
+		Date d2 = new Date();
+		long time = d2.getTime() - d1.getTime();
+		System.out.println(time / 1000 + "segundos para criacao");
+		
+		Thread.sleep(15000);
+		Date d3 = new Date();
+
+		int loop = 100;
+//		PracaListQueryNoSort pq = new PracaListQueryNoSort();
+		PracaListQuery pq = new PracaListQuery();
+
+		Random random = new Random(123l);
+		
+		String nomeArquivo="SQL-"+totalNegociacoes*totalPracas;
+		
+//		FileWriter fw = new FileWriter(new File("src\\main\\resources\\" + nomeArquivo+"NS-log.txt"));
+		FileWriter fw = new FileWriter(new File("src\\main\\resources\\" + nomeArquivo+"-log.txt"));
+
+		for (int i = 0; i < loop; i++) {
+
+			EnderecoTeste endOr = enderecos[random.nextInt(enderecos.length)];
+			EnderecoTeste endDest = enderecos[random.nextInt(enderecos.length)];
+
+			pq.setCepIni(endOr.getCep());
+			pq.setCodMunicipioIni(endOr.getCodigoMun());
+			pq.setCodUfIni(endOr.getCodigoUf());
+			pq.setCofPaisIni(endOr.getCodigoPais());
+
+			pq.setCepFim(endDest.getCep());
+			pq.setCodMunicipioFim(endDest.getCodigoMun());
+			pq.setCodUfFim(endDest.getCodigoUf());
+			pq.setCofPaisFim(endDest.getCodigoPais());
+
+			List<Object[]> pqueryRet = dao.list(pq);
+
+			System.out.println(i + "-" +pqueryRet.size() + " registros encontrados");
+			fw.write(pqueryRet.size() + " registros encontrados");
+			fw.write(LINE_SEPARATOR);
+//			for (Object[] praca : pqueryRet) {
+//				System.out.println(praca[0] + " - " +praca[1]+" - "+ praca[2]);
+//			}
+		}
+
+		Date d4 = new Date();
+		long time2 = d4.getTime() - d3.getTime();
+		System.out.println(time2 + "milisegundos para execução");
+		
+		fw.write(time2  + "milisegundos para execução");
+		
+		fw.flush();
+		fw.close();
+		
+	}
+	
+	@Test
 	public void createBase() {
 
-		int totalNegociacoes = 5000;
+		int totalNegociacoes = 750;
 		int totalPracas = 25;
 
 		Date d1 = new Date();
@@ -163,6 +185,8 @@ public class CotacaoTest {
 		Date d2 = new Date();
 		long time = d2.getTime() - d1.getTime();
 		System.out.println(time / 1000 + "segundos para execução");
+		
+		
 //		System.out.println(pracaCount + "praças criadas");
 //		System.out.println(emp + "negociações criadas");
 
@@ -171,20 +195,35 @@ public class CotacaoTest {
 	@Test
 	public void testWriteDSL() {
 		
-		int totalNegociacoes = 1000;
-		int totalPracas = 15;
+		int totalNegociacoes = 100000;
+		int totalPracas = 25;
+		
+		int[] negociacoesList = {75000};
+		
+		for (int negociacoes : negociacoesList) {
+			testDSL(negociacoes, totalPracas);
+			
+		}
+		
+
+	}
+
+	private void testDSL(int totalNegociacoes, int totalPracas) {
 		List<Negociacao> negociacaoList = TestUtils.createBase(totalNegociacoes, totalPracas,enderecos,tipos);
 		
 		try {
-			DSLUtils.escreverArquivo("teste1", negociacaoList);
-			List<NegociacaoDSL> arquivoDSL = DSLUtils.lerArquivo("teste1");
+			String nomeArquivo="DSL-"+totalNegociacoes*totalPracas;
+			DSLUtils.escreverArquivo(nomeArquivo, negociacaoList);
+			List<NegociacaoDSL> arquivoDSL = DSLUtils.lerArquivo(nomeArquivo);
 			
 			
 			Random random = new Random(123l);
 
+			FileWriter fw = new FileWriter(new File("src\\main\\resources\\" + nomeArquivo+"-log.txt"));
+						
 			Date d2 = new Date();
 
-			int loop = 1;
+			int loop = 100;
 
 			for (int i = 0; i < loop; i++) {
 
@@ -201,17 +240,22 @@ public class CotacaoTest {
 				List<PracaDSL> retBusca = DSLUtils.buscarPracas(endIni, endFim, arquivoDSL);
 				
 				System.out.println(retBusca.size() + " registros encontrados");
+				fw.write(retBusca.size() + " registros encontrados");
+				fw.write(LINE_SEPARATOR);
 
-				for (PracaDSL praca : retBusca) {
-					System.out.println(praca.getIdNegociacao() + " - "+praca.getIdPraca() + " - " + praca.getOrderIndex());
-				}
+//				for (PracaDSL praca : retBusca) {
+//					System.out.println(praca.getIdNegociacao() + " - "+praca.getIdPraca() + " - " + praca.getOrderIndex());
+//				}
 
 			}
 
 			Date d3 = new Date();
 			long time2 = d3.getTime() - d2.getTime();
-			System.out.println(time2 / 1000 + "segundos para execução");
+			System.out.println(time2  + "milisegundos para execução");
+			fw.write(time2  + "milisegundos para execução");
 			
+			fw.flush();
+			fw.close();
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -235,6 +279,59 @@ public class CotacaoTest {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
+//	}
+	
+//	@Test
+//	public void testCotacaoMapa() {
+//
+//		int totalNegociacoes = 1000;
+//		int totalPracas = 15;
+//
+//		List<Negociacao> negociacaoList = TestUtils.createBase(totalNegociacoes, totalPracas,enderecos,tipos);
+//
+//		Random random = new Random(123l);
+//
+//		Date d2 = new Date();
+//
+//		int loop = 100;
+//
+//		for (int i = 0; i < loop; i++) {
+//			List<PracaWrapper> pracaRet = new ArrayList<PracaWrapper>();
+//
+//			EnderecoTeste endOr = enderecos[random.nextInt(enderecos.length)];
+//			EnderecoTeste endDest = enderecos[random.nextInt(enderecos.length)];
+//
+//			Endereco endIni = new Endereco();
+//			TestUtils.toEndereco(endOr, endIni);
+//
+//			Endereco endFim = new Endereco();
+//			TestUtils.toEndereco(endDest, endFim);
+//
+//			for (Negociacao negociacao : negociacaoList) {
+//				List<Praca> pracaList = negociacao.getPracaList();
+//
+//				for (Praca praca : pracaList) {
+//					if (praca.getAreaOrigem().atende(endIni) && praca.getAreaDestino().atende(endFim)) {
+//
+//						pracaRet.add(new PracaWrapper(negociacao.getId(), praca.getId(), praca.getOrder_index()));
+//
+//						break;
+//					}
+//				}
+//
+//			}
+//			System.out.println(pracaRet.size() + " registros encontrados");
+//
+////			for (PracaWrapper praca : pracaRet) {
+////				System.out.println(praca.getNegociacaoId() + " - "+praca.getPracaId() + " - " + praca.getOrderIndex());
+////			}
+//
+//		}
+//
+//		Date d3 = new Date();
+//		long time2 = d3.getTime() - d2.getTime();
+//		System.out.println(time2 / 1000 + "segundos para execução");
+//
 //	}
 
 

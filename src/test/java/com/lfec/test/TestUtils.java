@@ -28,7 +28,7 @@ public class TestUtils {
 			List<Municipio> municipiolist = new ArrayList<Municipio>();
 			r.setMunicipioRegiaoList(municipiolist);
 
-			for (int i = codigoMun - 10; i < codigoMun + 10; i++) {
+			for (int i = codigoMun - 2; i < codigoMun + 2; i++) {
 				Municipio m = new Municipio(new Integer(i), "municipio " + i);
 				municipiolist.add(m);
 			}

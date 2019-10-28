@@ -137,30 +137,34 @@ public class Dao {
 
 	public <T extends Entidade> List<T> persist(List<T> objList) {
 
-		EntityTransaction transaction = openTransaction();
-		EntityManager manager = getManager();
-		try {
-
-			for (T obj : objList) {
-
-				if (obj.isNew()) {
-					manager.persist(obj);
-
-				} else {
-					manager.merge(obj);
-				}
-
-			}
-
-			manager.flush();
-			transaction.commit();
-		} catch (Exception e) {
-			if (transaction != null) {
-				transaction.rollback();
-			}
-		} finally {
-			manager.close();
+		
+		for (T t : objList) {
+			persist(t);
 		}
+//		EntityTransaction transaction = openTransaction();
+//		EntityManager manager = getManager();
+//		try {
+//
+//			for (T obj : objList) {
+//
+//				if (obj.isNew()) {
+//					manager.persist(obj);
+//
+//				} else {
+//					manager.merge(obj);
+//				}
+//
+//			}
+//
+//			manager.flush();
+//			transaction.commit();
+//		} catch (Exception e) {
+//			if (transaction != null) {
+//				transaction.rollback();
+//			}
+//		} finally {
+//			manager.close();
+//		}
 		return objList;
 	}
 
